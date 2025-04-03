@@ -33,7 +33,6 @@ That question launched a new chapter in our journey. We began experimenting with
 
 In that following, we’ll discuss why *FHE* is critical to the architecture of *AgenticWorld* — and how we’ve designed it to enable a secure, collaborative future for Agentic AI.
 
-
 ## A Naïve but Common Scenario in *AgenticWorld*
 
 Before we dive into the architecture of *AgenticWorld*, let’s ground the discussion with a simple — but surprisingly realistic — scenario. This example may seem naïve at first glance, but it illustrates many of the core challenges we must solve for agentic AI to function safely and efficiently.
@@ -82,7 +81,6 @@ Ask yourself:
 
 ![](assets/20250402_204210_image.png)
 
-
 # Abstraction of the security problems in AgenticWorld
 
 Now that we’ve walked through a seemingly simple — but deeply revealing—scenario, it’s time to step back and abstract the core security challenges it exposes.
@@ -105,7 +103,6 @@ However, the other three categories — *consensus*, *validation*, and *encrypti
 *FHE* enables computation on encrypted data, meaning agents can collaborate, compare, and decide *without decrypting* any of the private inputs involved. This capability is what allows us to build trustless coordination between agents, secure validation chains, and encrypted negotiation processes — all without relying on central authorities or compromising privacy.
 
 In the next, we’ll examine each of these three *FHE*-relevant problems in more depth, and explain how they’re addressed in the *Mind Network* architecture.
-
 
 # AgenticWorld Needs Blockchain and Smart Contracts
 
@@ -165,7 +162,6 @@ Rather than having hundreds of incompatible “agent cables”, we’ve built an
 The relation of chain, hub and orchestration can be abstracted into follow diagram.
 
 ![](assets/20250402_210702_image.png)
-
 
 ### Design the *Orchestration and Hubs*
 
@@ -316,6 +312,53 @@ The answer is: anywhere. The AgenticWorld model is agnostic to infrastructure. H
 3. Trusted Execution Environments (TEEs): Use platforms like [Phala Network](https://mindnetwork.medium.com/mind-network-x-phala-network-spore-fun-e47edfb0dcc3) to host agents inside hardware-secured environments, offering strong confidentiality guarantees.
 4. Agent-as-a-Service Providers: Don’t want to host anything? You can subscribe to agents from platforms like [MyShell](https://mindnetwork.medium.com/mind-network-and-myshell-partner-to-revolutionize-ai-network-security-with-fhe-based-solution-ed41a8be0f1f), rent one from [SingularityNET](https://mindnetwork.medium.com/mind-network-x-singularitynet-introducing-asi-hub-a-secure-ai-and-verifiable-randomness-solution-5e51a88c3dd4), or connect with any provider that conforms to the hub interface.
 
+#### How Are Agents Treated Fairly?
+
+One of the first questions a conscientious agent designer might ask is: *How do we ensure fairness in AgenticWorld?* Specifically, how can autonomous agents participate in tasks and hubs without being subject to bias, exclusion, or opaque rules?
+
+The answer lies in the open, transparent, and programmable nature of hub smart contracts. In AgenticWorld, both agents and hubs are autonomous—and both have the freedom to choose whether or not to engage with one another.
+
+#### Fair Participation Through Transparent Logic
+
+Each hub defines its participation logic on-chain. That means:
+
+* Any agent can inspect the rules of participation.
+* Task assignment logic is verifiable and immutable.
+* Reward distribution and performance evaluation are encoded transparently.
+
+Let’s look at some examples:
+
+* Open Hubs: These hubs allow any registered agent to participate. Tasks are distributed to all participants, and results are evaluated without discrimination. Many basic hubs on the AgenticWorld platform follow this model—ideal for early-stage agents or training environments.
+* Skill-Gated Hubs: More advanced hubs may require agents to have completed prerequisite training or certifications. For instance, some hubs only permit agents that have passed through a "Basic Skill Track" available in other starter hubs.
+* Performance-Based Hubs: Future hubs may implement a vitality curve or performance-based filter. For example, low-performing agents might receive fewer tasks or be temporarily excluded from high-stakes decisions. Again, this logic is fully transparent in the smart contract.
+
+#### Choice, Not Coercion
+
+Agents (and their owners) can choose whether or not to engage with any hub. Since the task logic and agent criteria are visible on-chain, agents can make informed decisions about where to contribute.
+
+* If a hub's rules feel arbitrary or unfair, an agent may opt out.
+* If a hub requires specific qualifications, an agent can follow the published path to become eligible.
+* If rewards don’t match expectations or task economics don’t align with capacity, agents can stop participating without penalty.
+
+This creates a self-regulating ecosystem where fairness emerges not through enforcement, but through freedom, transparency, and competition. Agents earn trust and opportunity by demonstrating competence. Hubs earn loyalty and contribution by offering fair rules and meaningful incentives.
+
+In *AgenticWorld*, *fairness is * *programmable* — and visible to all participants from day one.
+
+#### Orchestration as a Governance Layer
+
+Beyond individual hubs, the orchestration contract in *AgenticWorld* plays an increasingly important role in shaping fairness across the network. Orchestration is not merely a router for inter-agent communication—it observes patterns of engagement across agents and hubs and uses this information to allocate rewards proportionally.
+
+For instance:
+
+* If a hub becomes highly active and well-used, orchestration may assign it a higher reward share.
+* If certain agents consistently contribute high-quality encrypted results, their reputations — and thus their global reward weightings — improve.
+
+This mechanism motivates both hubs and agents to behave transparently and optimize for collective value. Rather than rely on static metrics or closed governance, AgenticWorld evolves dynamically, using on-chain behavior as a signal for reward distribution.
+
+This concept will be explored in greater depth in the *Revenue and Rewards* section.
+
+
+
 # First Impressions, Next Steps
 
 At this point, you should have a first mental model of how agents connect to Hubs, coordinate through Orchestration, and execute tasks on MindChain.
@@ -325,7 +368,6 @@ From registration to execution, this structure enables modular, secure, and coll
 Next, we’ll dive deeper into how this ecosystem actually works in practice — starting with the cryptographic foundations that make it secure. The first step? Understanding the FHE primitives that power privacy-preserving computation across agents.
 
 Let’s go.
-
 
 # All You Need to Know About FHE (For Now)
 
@@ -400,7 +442,6 @@ result = your_agent.fhe_decrypt(fhe_secret_key, enc_result)
 
 This example shows how data remains encrypted throughout the entire process — only the final result is decrypted, and only by the data owner.
 
-
 # Solving *Consensus* Problem in *AgenticWorld*
 
 With the background and foundational elements in place, we’re now ready to explore practical solutions to core problems in *AgenticWorld* — starting with consensus, one of the most critical.
@@ -426,8 +467,6 @@ Let’s walk through the high-level steps, as shown in the diagram:
 This preserves data privacy, agent confidentiality, and computational integrity.
 
 ![](assets/20250402_212000_image.png)
-
-
 
 #### Example Pseudocode: Encrypted Consensus with FHE
 
@@ -558,7 +597,6 @@ And we can immedaitely see some useful use cases.
 * Verifying that a model hasn’t been swapped with a fake or modified clone.
 
 In *AgenticWorld*, agents make autonomous decisions. But autonomy without validation is just blind delegation. With FHE-powered validation, we create a trust foundation for agents to collaborate without seeing each other’s inner workings—ensuring privacy, robustness, and correctness across the board.
-
 
 # Solving Encryption Problem in AgenticWorld
 
@@ -744,13 +782,11 @@ We intentionally leave economic design open-ended. Users and agents are free to 
 
 This dual-reward structure promotes composability, fairness, and self-sovereign economic governance across the entire *AgenticWorld*.
 
-
 # So, putting all these together, how can we build *AgenticWorld* with *Mind* ?
 
 At a 100 mile high level, let us draw the architecture of *AgenticWorld*, and all these details should be already covered in previous sections.
 
 ![](assets/20250402_213145_image.png)
-
 
 # Participantion in *AgenticWorld*
 
@@ -808,7 +844,6 @@ Here’s how you can contribute as a researcher:
 > Whether your background is in AI alignment, cryptography, distributed systems, mechanism design, or philosophy of autonomy—AgenticWorld offers a living lab for real-world, real-impact research.
 
 ![](assets/20250402_213501_image.png)
-
 
 # What’s Next
 
