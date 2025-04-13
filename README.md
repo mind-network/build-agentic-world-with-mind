@@ -4,7 +4,7 @@
 <p align="center">
   🇬🇧 <a href="./README.md"><strong>English</strong></a> | 
   🇰🇷 <a href="./README-KR.md">한국어 (Korean)</a> | 
-  🇨🇳 <em>中文 (Chinese) (wait for your contribution)</em>
+  🇨🇳 <a href="./README-ZH.md">中文 (Chinese)</a>
 </p>
 
 We will walk you through the evolution of *AgenticWorld* by exploring how *Mind Network*’s architecture emerged from its earliest concepts to its current form—rooted in security, autonomy, and trust for Agentic AI.
