@@ -1,4 +1,12 @@
-# 用 *Mind* 构建 *AgenticWorld*
+## 用 *Mind* 构建 *AgenticWorld*
+
+> 本项目文档已提供多种语言版本，欢迎通过 Pull Request 改进或新增其他语言版本。
+
+<p align="center">
+  🇬🇧 <a href="./README.md"><strong>English</strong></a> | 
+  🇰🇷 <a href="./README-KR.md">한국어 (Korean)</a> | 
+  🇨🇳 <a href="./README-ZH.md">中文 (Chinese)</a>
+</p>
 
 我们将带你逐步了解 *AgenticWorld* 的演进之路，探索 *Mind Network* 的架构是如何从最初的构想发展到如今的形式——以安全性、自主性与可信性为根基，面向 Agentic AI 的未来。
 
