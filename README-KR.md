@@ -1,5 +1,12 @@
 # 마인드로 AgenticWorld 구축
 
+> This project documentation is available in multiple languages, and you are welcome to improve or add new language version via Pull Request. 
+<p align="center">
+  🇬🇧 <a href="./README.md">English</a> | 
+  🇰🇷 <a href="./README-KR.md"><strong>한국어 (Korean)</strong></a> | 
+  🇨🇳 <em>中文 (Chinese) (wait for your contribution)</em>
+</p>
+
 AgenticWorld 의 진화 과정을 살펴보겠습니다. Mind Network 의 아키텍처가 초기 개념에서 현재 형태에 이르기까지 어떻게 발전했는지 살펴보겠습니다 . 이 아키텍처는 Agentic AI의 보안, 자율성, 신뢰에 기반을 두고 있습니다.
 
 ## AgenticWorld 구축의 동기
