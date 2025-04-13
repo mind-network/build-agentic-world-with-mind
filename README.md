@@ -51,9 +51,6 @@ As you read, try mapping this to situations in your own life or work — you mig
 1. You are a human — or more likely, a Web3-native user comfortable with on-chain assets and agent infrastructure.
 2. You hold some digital wealth, such as ETH (or USD in web2), and you either own or subscribe to one or more AI agents. These agents act on your behalf to manage that wealth.
 3. Naturally, your goal is to grow your ETH — or at the very least, avoid losing it
-4. You are a human — or more likely, a Web3-native user comfortable with on-chain assets and agent infrastructure.
-5. You hold some digital wealth, such as ETH (or USD in web2), and you either own or subscribe to one or more AI agents. These agents act on your behalf to manage that wealth.
-6. Naturally, your goal is to grow your ETH — or at the very least, avoid losing it.
 
 ![](./assets/scenario-setting.png)
 
