@@ -186,49 +186,47 @@ MCP 为不同的模型、代理和工具之间的交互提供了统一接口。�
 
 *Orchestration 合约* 是 *AgenticWorld* 的核心协调组件。其主要职责包括：
 
-* **Hub 注册** —— 维护符合协议标准的代理 Hub 注册表；
-* **调用路由** —— 使 Hub 之间能通过统一接口进行交互，避免直接耦合每个合约。
+- **Hub 注册**：维护符合协议标准的代理 Hub 注册表  
+- **调用路由**：使 Hub 之间能通过统一接口进行交互，避免直接耦合每个合约
 
 通过标准化的路由逻辑，该编排层确保了 Hub 之间的互操作性，并简化了系统集成。开发者无需自行编写点对点通信逻辑，也无需担心接口不匹配的问题。所有跨 Hub 消息交互都通过中心编排合约完成。
 
-我们已经在 *[MindChain](https://docs.mindnetwork.xyz/minddocs/product/mindchain)* 上部署了该编排合约，因此开发者可以立即接入，无需自行构建这一部分，从而专注于构建符合协议的业务 Hub。
+我们已经在 [MindChain](https://docs.mindnetwork.xyz/minddocs/product/mindchain) 上部署了该编排合约，因此开发者可以立即接入，无需自行构建这一部分，从而专注于构建符合协议的业务 Hub。
 
 ```solidity
 interface IHub {
-    function receiveCall(uint256 fromHubId, string calldata data);
+    function receiveCall(uint256 fromHubId, string calldata data) external;
 }
 
 contract HubOrchestration {
-    ....
-
     // Hub ID 映射至其合约地址
     mapping(uint256 => address) public hubs;
-    ....
 
-    function registerHub(uint256 hubId, address hubAddress) {
+    function registerHub(uint256 hubId, address hubAddress) public {
         hubs[hubId] = hubAddress;
     }
 
-    function routeCall(uint256 fromHubId, uint256 toHubId, string calldata data) {
+    function routeCall(uint256 fromHubId, uint256 toHubId, string calldata data) public {
         address toHub = hubs[toHubId];
         require(toHub != address(0), "Target hub not registered");
         IHub(toHub).receiveCall(fromHubId, data);
     }
-
-    ....
 }
+```
 
-#### Hub 合约模板
+---
+
+### Hub 合约模板
 
 Hub 合约是 *AgenticWorld* 的任务执行层。每个 Hub 代表一个特定领域的代理或协议组件 —— 负责预测、聚合、验证、协商等任务。
 
 一个 Hub 的核心职责包括：
 
-* 向 Orchestration 合约注册自身，加入代理网络
-* **任务注册** —— 接收外部代理或用户定义的任务并存储
-* **任务执行** —— 执行计算、生成预测或聚合结果
-* **任务共识** —— 可选地与其他 Hub 协同达成结果共识
-* **跨 Hub 通信** —— 通过编排层发送或接收其他 Hub 的调用
+- 向 Orchestration 合约注册自身，加入代理网络  
+- **任务注册**：接收外部代理或用户定义的任务并存储  
+- **任务执行**：执行计算、生成预测或聚合结果  
+- **任务共识**：可选地与其他 Hub 协同达成结果共识  
+- **跨 Hub 通信**：通过编排层发送或接收其他 Hub 的调用  
 
 Mind Network 提供的模板定义了 Hub 开发的基础结构，包括通用任务格式、注册逻辑、元信息接口和用于接收路由请求的 `receiveCall()` 入口。
 
@@ -240,79 +238,87 @@ Mind Network 提供的模板定义了 Hub 开发的基础结构，包括通用�
 contract HubN is IHub {
     uint256 public hubId;
     address public orchestration;
-  
+
     // 任务 ID 到布尔值的映射用于跟踪任务注册
     mapping(uint256 => bool) public taskID;
     uint256[] public taskList; // [task_id_1, task_id_2, ..., task_id_n]
-    ...
 
-    function registerTask(uint256 taskID, string calldata data);
-    function getTask(uint256 taskID) return (Task memory);
-    function doTask(uint256 taskID, string calldata data);
-    function taskConsensus(uint256 taskID);
-    ....
+    function registerTask(uint256 taskID, string calldata data) external {}
+    function getTask(uint256 taskID) external view returns (Task memory) {}
+    function doTask(uint256 taskID, string calldata data) external {}
+    function taskConsensus(uint256 taskID) external {}
 
-    function callOtherHub(uint256 toHubId, string calldata data) {
+    function callOtherHub(uint256 toHubId, string calldata data) external {
         HubOrchestration(orchestration).routeCall(hubId, toHubId, data);
     }
 
-    function receiveCall(uint256 fromHubId, string calldata data) {
+    function receiveCall(uint256 fromHubId, string calldata data) external {
         require(msg.sender == orchestration, "Unauthorized source");
         // 处理接收到的消息
         emit TaskReceived(fromHubId, data);
     }
 
     event TaskReceived(uint256 fromHubId, string data);
-    ....
 }
+```
 
-代理在 Hub 中如何工作？
+---
+
+### 代理在 Hub 中如何工作？
+
 一旦 Orchestration 和 Hubs 在 MindChain 上部署完成，代理就可以开始连接、协作，并为更广泛的 AgenticWorld 世界贡献力量。
 
 你可以把它想象成区块链中的矿工：代理加入网络、注册至某个 Hub，并开始执行任务。但与“挖矿”不同，它们贡献的是智能、计算与决策 —— 并且是链上自治的。
 
 为了确保系统的互操作性和可扩展性，我们定义了一个最小化标准接口，用于描述代理的行为。这些基本函数使得代理和 Hub 可以轻松发现彼此、协调工作 —— 同时也保留了实现层的创新空间。
 
-标准化的 Agent-Hub 接口
+---
+
+### 标准化的 Agent-Hub 接口
+
 我们将代理与 Hub 的交互抽象为三个核心函数：
 
-agent_hub_registration()：代理与特定 Hub 建立连接，开始握手流程，标识身份并启用后续交互。
+1. **agent_hub_registration()**：  
+   代理与特定 Hub 建立连接，开始握手流程，标识身份并启用后续交互
 
-agent_task_registration()：注册具体任务。代理与 Hub 就任务 ID、上下文和执行范围达成一致。
+2. **agent_task_registration()**：  
+   注册具体任务。代理与 Hub 就任务 ID、上下文和执行范围达成一致
 
-agent_task_execution()：执行已注册任务。代理完成计算并提交结果，由 Hub 验证、接受或上报。
+3. **agent_task_execution()**：  
+   执行已注册任务。代理完成计算并提交结果，由 Hub 验证、接受或上报
 
 这些标准化的接口钩子，使几乎任何代理架构都可以接入任意 Hub —— 只要它符合这一协议。
 
-开发者的自由：接入你自己的逻辑
+---
+![](assets/20250402_211144_image.png)
+
+### 开发者的自由：接入你自己的逻辑
+
 虽然接口是标准化的，但实现逻辑完全由开发者决定。你可以构建任何形式的代理 —— 基于规则、基于大模型、启发式、神经网络或混合模型 —— 只要它支持上述三个函数，它就可以参与 AgenticWorld。
-
-我们将结合 Web2 和 Web3 的示例，展示它是如何工作的。
-
-Web2 中的代理：可复用的框架
-Web2 的 AI 生态已经发展出许多成熟的开源代理框架，它们可以适配为 Hub 或代理并运行在 MindChain 上。以下是一些流行的选择：
-
-LangChain / LangGraph —— 将 LLM 调用组织为任务流程
-
-AutoGen —— 多代理协作与反馈循环框架
-
-CrewAI —— 面向团队目标的代理编排系统
-
-这些框架都可以包裹进代理接口层，然后无缝接入链上 Hub。
-
-Web3 中的代理：去中心化的实现
-在 Web3 世界，我们已经看到了一些原生的代理平台，并已与它们完成集成：
-
-Swarms —— 分布式多代理协调系统
-
-AI16Z —— 代理身份与声誉层
-
-Virtuals —— 与 Token 绑定的自治经济代理
-
-它们都可以作为独立代理运行，或注册至 Hub，参与任务执行、决策制定或结果验证。
 
 ---
 
+### Web2 中的代理：可复用的框架
+
+Web2 的 AI 生态已经发展出许多成熟的开源代理框架，它们可以适配为 Hub 或代理并运行在 MindChain 上。以下是一些流行的选择：
+
+- **LangChain / LangGraph**：将 LLM 调用组织为任务流程  
+- **AutoGen**：多代理协作与反馈循环框架  
+- **CrewAI**：面向团队目标的代理编排系统  
+
+这些框架都可以包裹进代理接口层，然后无缝接入链上 Hub。
+
+---
+
+### Web3 中的代理：去中心化的实现
+
+在 Web3 世界，我们已经看到了一些原生的代理平台，并已与它们完成集成：
+
+- **Swarms**：分布式多代理协调系统  
+- **AI16Z**：代理身份与声誉层  
+- **Virtuals**：与 Token 绑定的自治经济代理  
+
+它们都可以作为独立代理运行，或注册至 Hub，参与任务执行、决策制定或结果验证。
 #### 代理究竟运行在哪里？
 
 一个常见的问题是：
@@ -484,23 +490,26 @@ FHE 背后的理论早在十多年前就已被证明，且由于近期工程上�
 
 这是一个概念性的示例，展示如何使用 FHE 来安全地加密两个数字并求和：
 
+
 ```Python
-# 第一步：密钥生成
+# Step 1: Key Generation
 fhe_secret_key, fhe_public_key, fhe_compute_key = your_agent.generate_fhe_keys(seed)
 
-# 第二步：加密数据
+# Step 2: Encrypt Data
 data = 1
 enc_data = your_agent.fhe_encrypt(fhe_public_key, data)
 
-# 第三步：对加密数据进行计算（加法 1 + 1）
+# Step 3: Compute on Encrypted Data (add 1 + 1)
 enc_result = other_agent.fhe_compute(fhe_compute_key, fhe_add, enc_data, enc_data)
 
-# 第四步：解密结果
+# Step 4: Decrypt Result
 result = your_agent.fhe_decrypt(fhe_secret_key, enc_result)  
-# 返回 2
+# returns 2
+```
 这个示例展示了数据在整个过程中始终保持加密状态——只有最终结果会被解密，且只有数据拥有者才能解密。
 
-# 解决 AgenticWorld 中的 共识问题
+ *** 
+ # 解决 AgenticWorld 中的 共识问题
 在建立了背景和基础元素之后，我们现在可以探索 AgenticWorld 中核心问题的实际解决方案——从共识问题开始，这是最关键的问题之一。
 
 上面的图表涉及多个问题（共识、验证和加密），这些问题有时会混淆在一起。为了使这个问题更易理解，我们将单独关注共识，逐步将其拆解成原子步骤，并展示 FHE 如何支持代理间隐私保护的协议达成。
@@ -510,34 +519,33 @@ result = your_agent.fhe_decrypt(fhe_secret_key, enc_result)
 
 这里的关键是：每个代理的回应在聚合过程中始终保持加密状态。你的代理只会解密最终结果。
 
-基于 FHE 的共识流程
+#### 基于 FHE 的共识流程
+
+
 让我们一起走过这个高层次的步骤，如图所示：
 
-提示：你的代理通过一个已注册的 Hub 提交任务。
-
-分发：任务被转发给多个能够处理请求的代理。
-
-加密响应：每个代理返回一个加密后的响应（没有人看到实际答案）。
-
-FHE 共识：Hub 使用 FHE 直接对加密数据运行共识功能（例如，多数投票）。
-
-解密最终结果：你的代理解密共识结果并做出决策。
+1. 提示：你的代理通过一个已注册的 Hub 提交任务。
+2. 分发：任务被转发给多个能够处理请求的代理。
+3. 加密响应：每个代理返回一个加密后的响应（没有人看到实际答案）。
+4. FHE 共识：Hub 使用 FHE 直接对加密数据运行共识功能（例如，多数投票）。
+5. 解密最终结果：你的代理解密共识结果并做出决策。
 
 这保持了数据隐私、代理机密性和计算完整性。
 
-
+![](assets/20250402_212000_image.png)
 
 示例伪代码：使用 FHE 的加密共识
 以下是如何在实践中实现这一过程的概念性分解：
-# 第一步：你的代理注册任务
+```Python
+# Step 1: Task registration by your agent
 task_id = hub.register_task(hub_id, your_agent, prompt)
 
-# 第二步：参与的代理注册并回应
+# Step 2: Participating agents register and respond
 agent_n.register(hub_id)
 encrypted_response_n = agent_n.fhe_encrypt(fhe_public_key, response_n)
 fhe_encrypted_response_n = agent_n.submit(hub_id, task_id, encrypted_response_n)
 
-# 第三步：聚合加密响应
+# Step 3: Aggregate encrypted responses
 fhe_encrypted_responses = [
     fhe_encrypted_response_1,
     fhe_encrypted_response_2,
@@ -545,28 +553,28 @@ fhe_encrypted_responses = [
     fhe_encrypted_response_n
 ]
 
-# 第四步：定义共识逻辑（例如，多数投票）
+# Step 4: Define consensus logic (e.g., majority vote)
 fhe_compute_logic = fhe_majority_vote
 
-# 第五步：在加密数据上执行共识计算
+# Step 5: Perform consensus computation over encrypted data
 fhe_consensused_response = hub.fhe_consensus(
     fhe_compute_key,
     fhe_compute_logic,
     fhe_encrypted_responses
 )
 
-# 第六步：你的代理解密最终结果
+# Step 6: Your agent decrypts the final result
 consensused_response = your_agent.fhe_decrypt(fhe_secret_key, fhe_consensused_response)
+```
 
 你的代理做出一个有根据的决策——在此过程中，永远不需要知道是谁说了什么，或者他们用了什么数据。
 
 这种基于 FHE 的共识模式解决了 AgenticWorld 中最大的一些信任挑战：
 
-代理可以在不暴露其内部逻辑或数据的情况下进行协作。
+* 代理可以在不暴露其内部逻辑或数据的情况下进行协作。
+* 网络可以在不依赖受信任第三方的情况下达成协议。
+* 你的代理可以验证结果，而无需知道是谁提供的——从而保护隐私和完整性。
 
-网络可以在不依赖受信任第三方的情况下达成协议。
-
-你的代理可以验证结果，而无需知道是谁提供的——从而保护隐私和完整性。
 # 解决 *AgenticWorld* 中的 *验证问题*
 
 在去中心化的代理生态系统中，*验证* 与 *共识* 同样至关重要。共识是聚合代理的回应，而验证则是验证特定结果的正确性或可信度——通常是在使用该结果进行关键决策之前。
@@ -599,22 +607,22 @@ consensused_response = your_agent.fhe_decrypt(fhe_secret_key, fhe_consensused_re
 #### 示例伪代码：使用 FHE 的加密验证
 
 ```Python
-# 第一步：你的代理定义一个服务验证任务（例如 DeepSeek）
+# Step 1: Your agent defines a validation task for a service (e.g., DeepSeek)
 task_id = hub.register_task(hub_id, your_agent, service_id_or_output)
 
-# 第二步：验证代理注册参与验证
+# Step 2: Validator agents register to participate in validation
 agent_n.register(hub_id)
 
-# 第三步：每个验证者独立评估服务或其输出
+# Step 3: Each validator independently evaluates the service or its output
 validation_result_n = agent_n.evaluate_service(service_id_or_output)
 
-# 第四步：每个结果使用公钥加密
+# Step 4: Each result is encrypted using the public key
 encrypted_validation_n = agent_n.fhe_encrypt(fhe_public_key, validation_result_n)
 
-# 第五步：验证者将加密验证提交给 Hub
+# Step 5: Validators submit encrypted validations to the hub
 fhe_encrypted_validation_n = agent_n.submit(hub_id, task_id, encrypted_validation_n)
 
-# 第六步：Hub 收集所有验证者的加密验证
+# Step 6: Hub collects encrypted validations from all validators
 fhe_encrypted_validations = [
     fhe_encrypted_validation_1,
     fhe_encrypted_validation_2,
@@ -622,7 +630,7 @@ fhe_encrypted_validations = [
     fhe_encrypted_validation_n
 ]
 
-# 第七步：Hub 使用 FHE 基于共识的逻辑（例如，阈值批准或多数）运行
+# Step 7: Hub runs FHE-based consensus logic (e.g., threshold approval or majority)
 fhe_compute_logic = fhe_validation_threshold_approval
 fhe_validated_result = hub.fhe_consensus(
     fhe_compute_key,
@@ -630,95 +638,87 @@ fhe_validated_result = hub.fhe_consensus(
     fhe_encrypted_validations
 )
 
-# 第八步：你的代理解密最终的验证结果
+# Step 8: Your agent decrypts the final validation outcome
 is_validated = your_agent.fhe_decrypt(fhe_secret_key, fhe_validated_result)
 
-# 第九步：基于验证，代理决定是否继续（或不继续）
+# Step 9: Based on validation, agent decides to proceed (or not)
 if is_validated:
     your_agent.use_service(deepseek)
 else:
     your_agent.reject_service(deepseek)
-这种设计带来了具体的好处：
+```
 
-验证者隐私——验证者可以在不透露其如何评估的情况下评估服务。
-
-信任层级——代理可以“信任信任”——通过加密验证。
-
-防篡改——如果 DeepSeek 或任何其他服务被破坏，验证过程可以检测到——以隐私和大规模的方式。
+这种设计带来了具体的好处是：
+* 验证者隐私——验证者可以在不透露其如何评估的情况下评估服务。
+* 信任层级——代理可以“信任信任”——通过加密验证。
+* 防篡改——如果 DeepSeek 或任何其他服务被破坏，验证过程可以检测到——以隐私和大规模的方式。
 
 我们可以立刻看到一些有用的应用场景：
 
-验证第三方大型语言模型是否返回一致的答案。
-
-检测代理的预测是否受到对抗性影响。
-
-验证模型是否被替换为假冒或修改的克隆。
+* 验证第三方大型语言模型是否返回一致的答案。
+* 检测代理的预测是否受到对抗性影响。
+* 验证模型是否被替换为假冒或修改的克隆。
 
 在 AgenticWorld 中，代理做出自主决策。但是没有验证的自主性只是盲目的委托。通过 FHE 驱动的验证，我们为代理之间的协作创造了一个信任基础——确保隐私、稳健性和正确性。
 
-解决 AgenticWorld 中的加密问题
+# 解决 AgenticWorld 中的加密问题
+
 在传统系统中，数据必须解密才能用于计算。但是在 AgenticWorld 中，这暴露了一个重大的安全漏洞：自主代理必须在不暴露敏感数据——无论是你的，还是其他人的——的情况下协作和计算。
 
 这就是加密问题：
 
-如何让代理在不查看明文的情况下处理私密数据？
+> 如何让代理在不查看明文的情况下处理私密数据？
 
 这就是完全同态加密（FHE）变得至关重要的地方。它使得数据在每个阶段——从源头、到传输、到多代理计算——保持加密状态，同时仍允许进行有用的工作。
 
-什么是加密问题？
+### 什么是加密问题？
 假设你希望你的代理与其他代理协调，分析一些私密输入（例如财务数据、身份或偏好），并返回一个结果。在传统的设置中：
 
-你需要在将数据传递给代理之前先解密它。
-
-代理会解密并将其转发给其他代理或服务。
-
-每经过一次跳跃，你的隐私就被泄露一次。
+* 你需要在将数据传递给代理之前先解密它。
+* 代理会解密并将其转发给其他代理或服务。
+* 每经过一次跳跃，你的隐私就被泄露一次。
 
 FHE 通过始终保持数据加密——即使在多个代理和计算步骤之间——解决了这个问题。
 
-基于 FHE 的加密流程
+### 基于 FHE 的加密流程
 下面是如何在整个流程中保持加密：
 
-加密输入：你使用 FHE 公钥加密你的数据，并将其发送给你的代理。
-
-加密计算：你的代理执行基于 FHE 的操作（如预处理或路由逻辑），而无需解密输入。
-
-委托：你的代理将加密数据转发给另一个代理。
-
-第二代理计算：第二个代理在加密数据上运行更多基于 FHE 的逻辑。
-
-结果返回：加密结果发送回你的代理。
-
-最终加密输出：你的代理将最终加密结果返回给你。
-
-解密：只有你，使用你的私钥，才能解密并读取结果。
+1. 加密输入：你使用 FHE 公钥加密你的数据，并将其发送给你的代理。
+2. 加密计算：你的代理执行基于 FHE 的操作（如预处理或路由逻辑），而无需解密输入。
+3. 委托：你的代理将加密数据转发给另一个代理。
+4. 第二代理计算：第二个代理在加密数据上运行更多基于 FHE 的逻辑。
+5. 结果返回：加密结果发送回你的代理。
+6. 最终加密输出：你的代理将最终加密结果返回给你。
+7. 解密：只有你，使用你的私钥，才能解密并读取结果。
 
 在整个过程中，明文从未可见——无论是你的代理，其他协作者，甚至在处理过程中。
 
+![](assets/20250402_212447_image.png)
+
 示例伪代码：在代理之间保持加密
-# 第一步：你加密你的私密输入数据
+```python
+# Step 1: You encrypt your private input data
 encrypted_input = your_agent.fhe_encrypt(fhe_public_key, sensitive_data)
 
-# 第二步：你将其发送给代理
+# Step 2: You send it to your agent
 your_agent.receive_encrypted_data(encrypted_input)
 
-# 第三步：代理执行加密计算
+# Step 3: Your agent performs encrypted computation
 encrypted_processed = your_agent.fhe_compute(fhe_compute_key, logic_A, encrypted_input)
 
-# 第四步：代理将加密数据转发给第二个代理进行进一步计算
+# Step 4: Your agent forwards to a second agent for further encrypted computation
 encrypted_processed_2 = other_agent.fhe_compute(fhe_compute_key, logic_B, encrypted_processed)
 
-# 第五步：结果被路由回你的代理
-# 第六步：你的代理返回加密结果给你
-# 第七步：你解密最终结果
+# Step 5: The result is routed back to your agent
+# Step 6: Your agent returns the encrypted result to you
+# Step 7: You decrypt the final result
 result = fhe_decrypt(fhe_secret_key, encrypted_processed_2)
+```
 这个模型确保：
 
-你对你的数据拥有完全所有权
-
-代理无法逆向工程输入或逻辑
-
-即使跨越不受信任的参与者，计算的完整性和隐私性也得以保持
+* 你对你的数据拥有完全所有权
+* 代理无法逆向工程输入或逻辑
+* 即使跨越不受信任的参与者，计算的完整性和隐私性也得以保持
 
 这是 AgenticWorld 中 零信任计算 的基础——代理自由协作，但永远不需要相互信任秘密。
 
@@ -928,7 +928,7 @@ result = fhe_decrypt(fhe_secret_key, encrypted_processed_2)
 * FHE 优化与硬件加速：Mind Network 继续通过编译器改进、电路优化和硬件加速的后端推动 FHE 性能达到生产准备状态。
 * 社区和激励实验：我们将启动资助、黑客松和奖励计划，以奖励早期构建者和研究人员，帮助塑造 *AgenticWorld* 的未来。
 
-#### 加入我们
+#### Join Us
 
 如果你对去中心化智能系统如何塑造互联网下一代感到好奇——我们邀请你与我们一起构建。
 
